@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from controller import edge_controller
 from db.database import Base, engine
 from model.edge_to_ems import EdgeToEmsModel
-
+from controller import dashboard_controller
 
 app = FastAPI()
 app.add_middleware(
@@ -17,7 +17,7 @@ app.add_middleware(
 Base.metadata.drop_all(bind=engine)
 Base.metadata.create_all(bind=engine)
 app.include_router(edge_controller.router)
-
+app.include_router(dashboard_controller.dashboard_router)
 
 
 @app.get("/")
