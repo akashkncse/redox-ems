@@ -33,8 +33,8 @@ export default function History() {
 
       <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DateTimePicker label="Start" value={start} onChange={(v) => v && setStart(v)} />
-          <DateTimePicker label="End" value={end} onChange={(v) => v && setEnd(v)} />
+          <DateTimePicker label="Start" value={start} onChange={(v) => v && setStart(v)} sx={{width: 300}}/>
+          <DateTimePicker label="End" value={end} onChange={(v) => v && setEnd(v)} sx={{width: 300}}/>
         </LocalizationProvider>
       </Box>
 
