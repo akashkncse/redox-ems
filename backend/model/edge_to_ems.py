@@ -1,31 +1,25 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float
+from sqlalchemy import Integer, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 
 from db.database import Base
 
 
 class EdgeToEmsModel(Base):
+    """SQLAlchemy model storing telemetry from ESP32.
+
+    Uses flat integer fields and a boolean flag for grid availability.
+    """
     __tablename__ = "edge_to_ems"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    time: Mapped[datetime] = mapped_column(DateTime)
-
-    solar_voltage: Mapped[float] = mapped_column(Float)
-    solar_current: Mapped[float] = mapped_column(Float)
-
-    bess_soc: Mapped[float] = mapped_column(Float)
-    bess_voltage: Mapped[float] = mapped_column(Float)
-    bess_current: Mapped[float] = mapped_column(Float)
-
-    grid_voltage: Mapped[float] = mapped_column(Float)
-    grid_current: Mapped[float] = mapped_column(Float)
-
-    ev1_soc: Mapped[float] = mapped_column(Float)
-    ev1_voltage: Mapped[float] = mapped_column(Float)
-    ev1_current: Mapped[float] = mapped_column(Float)
-
-    ev2_soc: Mapped[float] = mapped_column(Float)
-    ev2_voltage: Mapped[float] = mapped_column(Float)
-    ev2_current: Mapped[float] = mapped_column(Float)
+    time: Mapped[datetime] = mapped_column(DateTime)  # proper datetime column
+    solarPower: Mapped[int] = mapped_column(Integer)
+    bessPower: Mapped[int] = mapped_column(Integer)
+    gridPower: Mapped[int] = mapped_column(Integer)
+    ev1Power: Mapped[int] = mapped_column(Integer)
+    ev2Power: Mapped[int] = mapped_column(Integer)
+    ev1: Mapped[bool] = mapped_column(Boolean)
+    ev2: Mapped[bool] = mapped_column(Boolean)
+    grid_availability: Mapped[bool] = mapped_column(Boolean)

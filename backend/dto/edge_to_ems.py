@@ -1,12 +1,18 @@
 from pydantic import BaseModel
-from dto.shared import Power, PowerWithSoc
 from datetime import datetime
 
 
 class EdgeToEms(BaseModel):
+    """DTO representing telemetry sent from ESP32 to EMS.
+
+    Fields are flat scalar values matching the JSON payload contract.
+    """
     time: datetime
-    solar: Power
-    bess: PowerWithSoc
-    grid: Power
-    ev1_power: PowerWithSoc
-    ev2_power: PowerWithSoc
+    solarPower: int
+    bessPower: int
+    gridPower: int
+    ev1Power: int
+    ev2Power: int
+    ev1: bool
+    ev2: bool
+    grid_availability: bool

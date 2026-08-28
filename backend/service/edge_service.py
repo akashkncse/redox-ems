@@ -10,24 +10,14 @@ def save_edge_data(
 ):
     record = EdgeToEmsModel(
         time=payload.time,
-
-        solar_voltage=payload.solar.voltage,
-        solar_current=payload.solar.current,
-
-        bess_soc=payload.bess.soc,
-        bess_voltage=payload.bess.voltage,
-        bess_current=payload.bess.current,
-
-        grid_voltage=payload.grid.voltage,
-        grid_current=payload.grid.current,
-
-        ev1_soc=payload.ev1_power.soc,
-        ev1_voltage=payload.ev1_power.voltage,
-        ev1_current=payload.ev1_power.current,
-
-        ev2_soc=payload.ev2_power.soc,
-        ev2_voltage=payload.ev2_power.voltage,
-        ev2_current=payload.ev2_power.current,
+        solarPower=payload.solarPower,
+        bessPower=payload.bessPower,
+        gridPower=payload.gridPower,
+        ev1Power=payload.ev1Power,
+        ev2Power=payload.ev2Power,
+        ev1=payload.ev1,
+        ev2=payload.ev2,
+        grid_availability=payload.grid_availability,
     )
 
     db.add(record)
