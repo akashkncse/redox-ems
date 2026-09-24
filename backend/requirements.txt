@@ -1,4 +1,0 @@
-fastapi[standard]
-sqlalchemy
-psycopg
-psycopg[binary]
