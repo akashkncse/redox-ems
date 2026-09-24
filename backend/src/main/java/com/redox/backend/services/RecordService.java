@@ -7,6 +7,9 @@ import com.redox.backend.repository.RecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class RecordService {
 
@@ -37,5 +40,13 @@ public class RecordService {
         }
 
         return recordRepository.save(record);
+    }
+
+    public Optional<Record> getLatestRecord() {
+        return recordRepository.findTopByOrderByIdDesc();
+    }
+
+    public List<Record> getRecentRecords() {
+        return recordRepository.findTop10ByOrderByIdDesc();
     }
 }

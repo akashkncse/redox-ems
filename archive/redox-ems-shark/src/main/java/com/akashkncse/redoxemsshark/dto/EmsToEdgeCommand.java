@@ -1,0 +1,4 @@
+package com.akashkncse.redoxemsshark.dto;
+
+public class EmsToEdgeCommand {
+}

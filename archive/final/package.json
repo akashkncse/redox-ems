@@ -1,0 +1,27 @@
+{
+  "name": "redox-ems-dashboard",
+  "version": "1.0.0",
+  "description": "Clean, modern large-screen EMS dashboard for ESP32 solar + battery + grid EV charging system",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "simulate": "node scripts/simulate-esp32.js",
+    "test": "node test/test-api.js"
+  },
+  "keywords": [
+    "esp32",
+    "ems",
+    "solar",
+    "battery",
+    "ev-charging",
+    "dashboard",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}

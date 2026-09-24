@@ -1,0 +1,1182 @@
+/* ==========================================================================
+   REDOX EMS — Solar + Battery + Grid EV Charging Control Center
+   Control-Room Dark Theme Stylesheet
+   ========================================================================== */
+
+:root {
+  /* Theme Base Colors */
+  --bg-main: #070b12;
+  --bg-surface: #0f1726;
+  --bg-card: #141f33;
+  --bg-card-hover: #192740;
+  --bg-control: #1a253a;
+  --bg-control-active: #243452;
+
+  /* Borders & Dividers */
+  --border-subtle: #1e2c45;
+  --border-strong: #2a3e61;
+  --border-active: #476294;
+
+  /* Typography Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-dim: #475569;
+
+  /* Energy Domain Visual Identities */
+  --solar-accent: #f59e0b;
+  --solar-glow: rgba(245, 158, 11, 0.18);
+  --solar-border: rgba(245, 158, 11, 0.4);
+
+  --battery-accent: #10b981;
+  --battery-glow: rgba(16, 185, 129, 0.18);
+  --battery-border: rgba(16, 185, 129, 0.4);
+
+  --grid-accent: #3b82f6;
+  --grid-glow: rgba(59, 130, 246, 0.18);
+  --grid-border: rgba(59, 130, 246, 0.4);
+
+  --ev1-accent: #6366f1;
+  --ev1-glow: rgba(99, 102, 241, 0.18);
+  --ev1-border: rgba(99, 102, 241, 0.4);
+
+  --ev2-accent: #8b5cf6;
+  --ev2-glow: rgba(139, 92, 246, 0.18);
+  --ev2-border: rgba(139, 92, 246, 0.4);
+
+  --status-on: #22c55e;
+  --status-off: #64748b;
+  --status-warn: #eab308;
+  --status-error: #ef4444;
+
+  /* Fonts */
+  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Spacings & Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 26px;
+  --shadow-card: 0 10px 28px -6px rgba(0, 0, 0, 0.45);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  min-height: 100vh;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 2rem 2.5rem;
+  max-width: 1920px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   TOP HEADER
+   ========================================================================== */
+
+.top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.1rem 1.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-mark {
+  width: 46px;
+  height: 46px;
+  background: linear-gradient(135deg, #1e3a8a, #0284c7);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #38bdf8;
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.3);
+}
+
+.logo-mark svg {
+  width: 26px;
+  height: 26px;
+}
+
+.system-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.system-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.header-center {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* ESP32 Connection Badge */
+.connection-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.status-pulse-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Connection States */
+.status-connected {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border-color: rgba(34, 197, 94, 0.4);
+}
+.status-connected .status-pulse-dot {
+  background-color: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+  animation: pulse-ring 2s infinite;
+}
+
+.status-waiting {
+  background: rgba(234, 179, 8, 0.15);
+  color: #facc15;
+  border-color: rgba(234, 179, 8, 0.4);
+}
+.status-waiting .status-pulse-dot {
+  background-color: #eab308;
+  box-shadow: 0 0 10px #eab308;
+}
+
+.status-disconnected {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+.status-disconnected .status-pulse-dot {
+  background-color: #ef4444;
+  box-shadow: 0 0 10px #ef4444;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.telemetry-timer {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  background: rgba(15, 23, 42, 0.6);
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.timer-label {
+  color: var(--text-muted);
+}
+
+.timer-value {
+  font-family: var(--font-mono);
+  color: #e2e8f0;
+  font-weight: 500;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.live-clock {
+  font-family: var(--font-mono);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: 0.05em;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+.pulse-green {
+  width: 6px;
+  height: 6px;
+  background-color: #38bdf8;
+  border-radius: 50%;
+  animation: pulse-ring 1.5s infinite;
+}
+
+/* ==========================================================================
+   STATUS OVERVIEW STRIP
+   ========================================================================== */
+
+.status-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.status-pill {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: border-color 0.2s;
+}
+
+.status-pill-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.status-pill-val {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+}
+
+.status-pill-sub {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+}
+
+.val-connected, .val-available, .val-charging {
+  color: #4ade80;
+}
+.val-waiting {
+  color: #facc15;
+}
+.val-disconnected, .val-unavailable {
+  color: #f87171;
+}
+.val-off {
+  color: #94a3b8;
+}
+
+/* ==========================================================================
+   PRIMARY METRICS KPI GRID (6 Large Cards)
+   ========================================================================== */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.75rem;
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  min-height: 155px;
+}
+
+.kpi-card:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
+}
+
+/* Category Accent Borders & Background Tints */
+.card-solar {
+  border-top: 4px solid var(--solar-accent);
+  background: linear-gradient(180deg, var(--solar-glow) 0%, var(--bg-card) 65%);
+}
+.card-battery {
+  border-top: 4px solid var(--battery-accent);
+  background: linear-gradient(180deg, var(--battery-glow) 0%, var(--bg-card) 65%);
+}
+.card-grid {
+  border-top: 4px solid var(--grid-accent);
+  background: linear-gradient(180deg, var(--grid-glow) 0%, var(--bg-card) 65%);
+}
+.card-soc {
+  border-top: 4px solid #14b8a6;
+  background: linear-gradient(180deg, rgba(20, 184, 166, 0.16) 0%, var(--bg-card) 65%);
+}
+.card-ev1 {
+  border-top: 4px solid var(--ev1-accent);
+  background: linear-gradient(180deg, var(--ev1-glow) 0%, var(--bg-card) 65%);
+}
+.card-ev2 {
+  border-top: 4px solid var(--ev2-accent);
+  background: linear-gradient(180deg, var(--ev2-glow) 0%, var(--bg-card) 65%);
+}
+
+.kpi-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.6rem;
+}
+
+.kpi-tag {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.kpi-icon {
+  font-size: 1.25rem;
+}
+
+.kpi-card-body {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.kpi-number {
+  font-family: var(--font-mono);
+  font-size: 2.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.kpi-unit {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.kpi-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.kpi-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.solar-dot { background-color: var(--solar-accent); }
+.battery-dot { background-color: var(--battery-accent); }
+.grid-dot { background-color: var(--grid-accent); }
+.soc-dot { background-color: #14b8a6; }
+.ev1-dot { background-color: var(--ev1-accent); }
+.ev2-dot { background-color: var(--ev2-accent); }
+.ev-dot { background-color: #a855f7; }
+
+.kpi-footer-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   SPLIT LAYOUT: POWER FLOW (Left) + EV CONTROLS (Right)
+   ========================================================================== */
+
+.layout-split {
+  display: grid;
+  grid-template-columns: 1.05fr 1.35fr;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.section-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.1rem;
+}
+
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #f1f5f9;
+}
+
+.section-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   POWER FLOW DIAGRAM SECTION
+   ========================================================================== */
+
+.powerflow-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+}
+
+.flow-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.powerflow-canvas-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #090e18;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  padding: 0.5rem;
+  position: relative;
+  min-height: 420px;
+}
+
+.powerflow-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 440px;
+  overflow: visible;
+}
+
+/* Flow paths */
+.flow-path {
+  fill: none;
+  stroke-width: 4px;
+  stroke-linecap: round;
+  transition: stroke 0.4s ease, opacity 0.4s ease;
+}
+
+.path-inactive {
+  stroke: #1f2b3e;
+  stroke-dasharray: 4 6;
+  opacity: 0.4;
+}
+
+.path-active-solar {
+  stroke: var(--solar-accent);
+  stroke-dasharray: 8 8;
+  animation: flow-dash-reverse 1.2s linear infinite;
+  filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.7));
+  opacity: 1;
+}
+
+.path-active-battery {
+  stroke: var(--battery-accent);
+  stroke-dasharray: 8 8;
+  animation: flow-dash 1.2s linear infinite;
+  filter: drop-shadow(0 0 5px rgba(16, 185, 129, 0.7));
+  opacity: 1;
+}
+
+.path-active-grid {
+  stroke: var(--grid-accent);
+  stroke-dasharray: 8 8;
+  animation: flow-dash 1.2s linear infinite;
+  filter: drop-shadow(0 0 5px rgba(59, 130, 246, 0.7));
+  opacity: 1;
+}
+
+.path-active-ev1 {
+  stroke: var(--ev1-accent);
+  stroke-dasharray: 8 8;
+  animation: flow-dash 1.2s linear infinite;
+  filter: drop-shadow(0 0 5px rgba(99, 102, 241, 0.7));
+  opacity: 1;
+}
+
+.path-active-ev2 {
+  stroke: var(--ev2-accent);
+  stroke-dasharray: 8 8;
+  animation: flow-dash 1.2s linear infinite;
+  filter: drop-shadow(0 0 5px rgba(139, 92, 246, 0.7));
+  opacity: 1;
+}
+
+@keyframes flow-dash {
+  from { stroke-dashoffset: 32; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes flow-dash-reverse {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: 32; }
+}
+
+/* Central Hub Visuals */
+.hub-outer-circle {
+  fill: #131d2e;
+  stroke: #334155;
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.2));
+}
+
+.hub-inner-circle {
+  fill: #0c1322;
+  stroke: #1e293b;
+  stroke-width: 2px;
+}
+
+.hub-text-title {
+  fill: #94a3b8;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.hub-text-sub {
+  fill: #38bdf8;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+/* Flow Node Boxes */
+.node-box {
+  stroke-width: 1.5px;
+  transition: all 0.3s ease;
+}
+
+.node-box-solar {
+  fill: #1a1b1a;
+  stroke: var(--solar-border);
+}
+.node-box-battery {
+  fill: #0f1c1a;
+  stroke: var(--battery-border);
+}
+.node-box-grid {
+  fill: #0f1826;
+  stroke: var(--grid-border);
+}
+.node-box-ev1 {
+  fill: #131428;
+  stroke: var(--ev1-border);
+}
+.node-box-ev2 {
+  fill: #171228;
+  stroke: var(--ev2-border);
+}
+
+.node-label {
+  fill: #94a3b8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+}
+
+.node-val {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.node-sub {
+  fill: #64748b;
+  font-size: 9.5px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+}
+
+.solar-text { fill: var(--solar-accent); }
+.battery-text { fill: var(--battery-accent); }
+.grid-text { fill: var(--grid-accent); }
+.ev1-text { fill: #818cf8; }
+.ev2-text { fill: #a78bfa; }
+
+/* ==========================================================================
+   EV CONTROL STATIONS SECTION (Right Column)
+   ========================================================================== */
+
+.controls-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+}
+
+.api-pill {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.api-idle {
+  background: rgba(30, 41, 59, 0.5);
+  color: #94a3b8;
+}
+
+.api-sending {
+  background: rgba(234, 179, 8, 0.15);
+  border-color: rgba(234, 179, 8, 0.4);
+  color: #facc15;
+}
+
+.api-success {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.4);
+  color: #4ade80;
+}
+
+.ev-stations-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  flex: 1;
+}
+
+.ev-station-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  position: relative;
+  box-shadow: var(--shadow-card);
+}
+
+#card-station-ev1 {
+  border-left: 4px solid var(--ev1-accent);
+}
+
+#card-station-ev2 {
+  border-left: 4px solid var(--ev2-accent);
+}
+
+.station-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.station-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.station-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  letter-spacing: 0.08em;
+}
+
+.station-name {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.actual-status-pill {
+  padding: 0.4rem 0.95rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.status-charging {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.5);
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.25);
+}
+
+.status-off {
+  background: rgba(100, 116, 139, 0.2);
+  color: #94a3b8;
+  border: 1px solid rgba(100, 116, 139, 0.4);
+}
+
+/* Power Strip Inside Station */
+.station-power-strip {
+  background: rgba(10, 15, 26, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.15rem;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.power-meter-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.power-meter-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.meter-number {
+  font-family: var(--font-mono);
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.meter-unit {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* Requested vs Actual Comparison Box */
+.comparison-panel {
+  background: #0c1220;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.comp-col {
+  flex: 1;
+}
+
+.comp-divider {
+  width: 1px;
+  height: 38px;
+  background: var(--border-subtle);
+  margin: 0 1rem;
+}
+
+.comp-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.comp-val {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+}
+
+.comp-indicator-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot-charging { background-color: #22c55e; box-shadow: 0 0 8px #22c55e; }
+.dot-off { background-color: #64748b; }
+.dot-requested { background-color: #38bdf8; }
+
+/* Pending Sync Pill */
+.pending-container {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+}
+
+.pending-pill {
+  width: 100%;
+  background: rgba(234, 179, 8, 0.15);
+  border: 1px solid rgba(234, 179, 8, 0.4);
+  color: #facc15;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: 0.03em;
+  animation: pulse-ring 2s infinite;
+}
+
+.synced-pill {
+  width: 100%;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.25);
+  color: #4ade80;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  letter-spacing: 0.03em;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Control Group Wrappers */
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-group-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+/* Large Toggle Buttons for Charging ON / OFF */
+.btn-group-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.btn-toggle {
+  background: var(--bg-control);
+  color: var(--text-secondary);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.btn-toggle:hover:not(.active) {
+  background: var(--bg-control-active);
+  color: #ffffff;
+  border-color: var(--border-strong);
+}
+
+.btn-toggle .btn-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #475569;
+  transition: all 0.2s;
+}
+
+.btn-on.active {
+  background: rgba(34, 197, 94, 0.22);
+  color: #4ade80;
+  border-color: #22c55e;
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.35);
+}
+.btn-on.active .btn-indicator {
+  background-color: #22c55e;
+  box-shadow: 0 0 10px #22c55e;
+}
+
+.btn-off.active {
+  background: rgba(71, 85, 105, 0.35);
+  color: #e2e8f0;
+  border-color: #64748b;
+  box-shadow: 0 0 14px rgba(100, 116, 139, 0.3);
+}
+.btn-off.active .btn-indicator {
+  background-color: #94a3b8;
+}
+
+/* Segmented Source Selector (Solar 0, Battery 1, Grid 2) */
+.btn-group-source {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.55rem;
+}
+
+.btn-source {
+  background: var(--bg-control);
+  color: var(--text-secondary);
+  border: 2px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 0.8rem 0.5rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.btn-source:hover:not(.active) {
+  background: var(--bg-control-active);
+  color: #ffffff;
+  border-color: var(--border-strong);
+}
+
+.src-icon {
+  font-size: 1.15rem;
+}
+
+.src-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.src-code {
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+/* Active Source Highlights */
+.btn-src-solar.active {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fbbf24;
+  border-color: var(--solar-accent);
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.35);
+}
+.btn-src-solar.active .src-code {
+  color: #fde68a;
+}
+
+.btn-src-battery.active {
+  background: rgba(16, 185, 129, 0.22);
+  color: #34d399;
+  border-color: var(--battery-accent);
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.35);
+}
+.btn-src-battery.active .src-code {
+  color: #a7f3d0;
+}
+
+.btn-src-grid.active {
+  background: rgba(59, 130, 246, 0.22);
+  color: #60a5fa;
+  border-color: var(--grid-accent);
+  box-shadow: 0 0 18px rgba(59, 130, 246, 0.35);
+}
+.btn-src-grid.active .src-code {
+  color: #bfdbfe;
+}
+
+/* ==========================================================================
+   BOTTOM DIAGNOSTICS & SYSTEM FOOTER
+   ========================================================================== */
+
+.bottom-diagnostics {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.5rem;
+}
+
+.diag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.diag-title {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.diag-status {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #38bdf8;
+  font-family: var(--font-mono);
+}
+
+.diag-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.diag-card {
+  background: #090e18;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.diag-card-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+}
+
+.diag-card code {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: #cbd5e1;
+  word-break: break-all;
+}
+
+#diag-summary-text {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: #94a3b8;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (Desktop / Large Wall Displays / Tablets)
+   ========================================================================== */
+
+@media (max-width: 1400px) {
+  .kpi-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .layout-split {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 992px) {
+  body {
+    padding: 1rem;
+  }
+  .top-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .header-center {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .header-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .status-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ev-stations-grid {
+    grid-template-columns: 1fr;
+  }
+  .diag-cards {
+    grid-template-columns: 1fr;
+  }
+}

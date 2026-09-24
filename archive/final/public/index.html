@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REDOX EMS — Solar + Battery + Grid EV Charging Control Center</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top Header Navigation & Live Link Banner -->
+  <header class="top-header">
+    <div class="header-left">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+      </div>
+      <div>
+        <h1 class="system-title">REDOX EMS</h1>
+        <p class="system-subtitle">Solar + Battery + Grid EV Charging Management</p>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <!-- ESP32 Connection Badge -->
+      <div id="esp32-badge" class="connection-badge status-waiting">
+        <span class="status-pulse-dot"></span>
+        <span id="esp32-status-text" class="status-label">ESP32 WAITING</span>
+      </div>
+
+      <div class="telemetry-timer">
+        <span class="timer-icon">🕒</span>
+        <span class="timer-label">Last ESP32 Post:</span>
+        <span id="last-telemetry-time" class="timer-value">Awaiting first handshake...</span>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="live-clock" id="live-clock">--:--:--</div>
+      <div class="live-indicator">
+        <span class="pulse-green"></span>
+        <span>LIVE AUTO-POLL (1.5s)</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="dashboard-container">
+
+    <!-- Top Alert / Status Strip -->
+    <section class="status-strip">
+      <div class="status-pill status-pill-esp">
+        <span class="status-pill-title">ESP32 LINK</span>
+        <span id="strip-esp-val" class="status-pill-val val-waiting">WAITING</span>
+        <span id="strip-esp-sub" class="status-pill-sub">POST / (Timeout: 10s)</span>
+      </div>
+
+      <div class="status-pill status-pill-grid">
+        <span class="status-pill-title">GRID AVAILABILITY</span>
+        <span id="strip-grid-val" class="status-pill-val val-unavailable">--</span>
+        <span id="strip-grid-sub" class="status-pill-sub">Power: -- W</span>
+      </div>
+
+      <div class="status-pill status-pill-ev1">
+        <span class="status-pill-title">EV 1 TELEMETRY</span>
+        <span id="strip-ev1-val" class="status-pill-val val-off">--</span>
+        <span id="strip-ev1-sub" class="status-pill-sub">Power: -- W</span>
+      </div>
+
+      <div class="status-pill status-pill-ev2">
+        <span class="status-pill-title">EV 2 TELEMETRY</span>
+        <span id="strip-ev2-val" class="status-pill-val val-off">--</span>
+        <span id="strip-ev2-sub" class="status-pill-sub">Power: -- W</span>
+      </div>
+    </section>
+
+    <!-- Primary Metrics Grid (6 Large KPI Cards) -->
+    <section class="kpi-grid">
+      <!-- 1. Solar Power -->
+      <div class="kpi-card card-solar">
+        <div class="kpi-card-header">
+          <span class="kpi-tag">SOLAR POWER</span>
+          <span class="kpi-icon">☀️</span>
+        </div>
+        <div class="kpi-card-body">
+          <div class="kpi-number" id="metric-solar">--</div>
+          <span class="kpi-unit">W</span>
+        </div>
+        <div class="kpi-card-footer">
+          <span class="kpi-indicator-dot solar-dot"></span>
+          <span class="kpi-footer-text" id="solar-footer-text">Photovoltaic Input</span>
+        </div>
+      </div>
+
+      <!-- 2. Battery / BESS Power -->
+      <div class="kpi-card card-battery">
+        <div class="kpi-card-header">
+          <span class="kpi-tag">BATTERY (BESS)</span>
+          <span class="kpi-icon">🔋</span>
+        </div>
+        <div class="kpi-card-body">
+          <div class="kpi-number" id="metric-bess">--</div>
+          <span class="kpi-unit">W</span>
+        </div>
+        <div class="kpi-card-footer">
+          <span class="kpi-indicator-dot battery-dot"></span>
+          <span class="kpi-footer-text" id="bess-footer-text">Battery Storage Exchange</span>
+        </div>
+      </div>
+
+      <!-- 3. Grid Power -->
+      <div class="kpi-card card-grid">
+        <div class="kpi-card-header">
+          <span class="kpi-tag">GRID POWER</span>
+          <span class="kpi-icon">⚡</span>
+        </div>
+        <div class="kpi-card-body">
+          <div class="kpi-number" id="metric-grid">--</div>
+          <span class="kpi-unit">W</span>
+        </div>
+        <div class="kpi-card-footer">
+          <span class="kpi-indicator-dot grid-dot"></span>
+          <span class="kpi-footer-text" id="grid-status-badge">Grid: --</span>
+        </div>
+      </div>
+
+      <!-- 4. Battery SOC -->
+      <div class="kpi-card card-soc">
+        <div class="kpi-card-header">
+          <span class="kpi-tag">BATTERY SOC</span>
+          <span class="kpi-icon">📊</span>
+        </div>
+        <div class="kpi-card-body">
+          <div class="kpi-number" id="metric-soc">-- %</div>
+        </div>
+        <div class="kpi-card-footer">
+          <span class="kpi-indicator-dot soc-dot"></span>
+          <span class="kpi-footer-text">State of Charge (H/W Pending)</span>
+        </div>
+      </div>
+
+      <!-- 5. EV1 Power -->
+      <div class="kpi-card card-ev1">
+        <div class="kpi-card-header">
+          <span class="kpi-tag">EV 1 POWER</span>
+          <span class="kpi-icon">🚗</span>
+        </div>
+        <div class="kpi-card-body">
+          <div class="kpi-number" id="metric-ev1">--</div>
+          <span class="kpi-unit">W</span>
+        </div>
+        <div class="kpi-card-footer">
+          <span class="kpi-indicator-dot ev1-dot"></span>
+          <span class="kpi-footer-text" id="ev1-state-badge">Status: --</span>
+        </div>
+      </div>
+
+      <!-- 6. EV2 Power -->
+      <div class="kpi-card card-ev2">
+        <div class="kpi-card-header">
+          <span class="kpi-tag">EV 2 POWER</span>
+          <span class="kpi-icon">🚙</span>
+        </div>
+        <div class="kpi-card-body">
+          <div class="kpi-number" id="metric-ev2">--</div>
+          <span class="kpi-unit">W</span>
+        </div>
+        <div class="kpi-card-footer">
+          <span class="kpi-indicator-dot ev2-dot"></span>
+          <span class="kpi-footer-text" id="ev2-state-badge">Status: --</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Grid: Power Flow Diagram + EV Control Stations -->
+    <div class="layout-split">
+
+      <!-- Visual Power Flow Section -->
+      <section class="powerflow-section">
+        <div class="section-title-bar">
+          <div>
+            <h2 class="section-title">ENERGY FLOW DIAGRAM</h2>
+            <p class="section-desc">Real-time visual distribution among generation, storage, grid & EV loads</p>
+          </div>
+          <div class="flow-legend">
+            <span class="legend-item"><span class="legend-dot solar-dot"></span> Solar</span>
+            <span class="legend-item"><span class="legend-dot battery-dot"></span> Battery</span>
+            <span class="legend-item"><span class="legend-dot grid-dot"></span> Grid</span>
+            <span class="legend-item"><span class="legend-dot ev-dot"></span> EV Load</span>
+          </div>
+        </div>
+
+        <div class="powerflow-canvas-wrapper">
+          <svg id="powerflow-svg" class="powerflow-svg" viewBox="0 0 740 460" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <!-- Gradients for Cards & Flow Lines -->
+              <linearGradient id="solar-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.05"/>
+              </linearGradient>
+              <linearGradient id="battery-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#10b981" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#10b981" stop-opacity="0.05"/>
+              </linearGradient>
+              <linearGradient id="grid-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.05"/>
+              </linearGradient>
+              <linearGradient id="ev-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#6366f1" stop-opacity="0.3"/>
+                <stop offset="100%" stop-color="#6366f1" stop-opacity="0.05"/>
+              </linearGradient>
+
+              <!-- Arrow Markers -->
+              <marker id="arrow-solar" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#f59e0b" />
+              </marker>
+              <marker id="arrow-battery" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981" />
+              </marker>
+              <marker id="arrow-grid" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#3b82f6" />
+              </marker>
+              <marker id="arrow-ev1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#6366f1" />
+              </marker>
+              <marker id="arrow-ev2" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#818cf8" />
+              </marker>
+            </defs>
+
+            <!-- Background connecting traces -->
+            <g class="flow-paths">
+              <!-- Solar to Central Hub: (370, 75) -> (370, 220) -->
+              <path id="path-solar" class="flow-path path-inactive" d="M 370 80 L 370 200" />
+
+              <!-- Battery to Central Hub: (120, 220) -> (310, 220) -->
+              <path id="path-battery" class="flow-path path-inactive" d="M 175 220 L 310 220" />
+
+              <!-- Grid to Central Hub: (620, 220) -> (430, 220) -->
+              <path id="path-grid" class="flow-path path-inactive" d="M 565 220 L 430 220" />
+
+              <!-- Central Hub to EV1: (330, 245) -> (200, 360) -->
+              <path id="path-ev1" class="flow-path path-inactive" d="M 340 245 L 205 350" />
+
+              <!-- Central Hub to EV2: (410, 245) -> (540, 360) -->
+              <path id="path-ev2" class="flow-path path-inactive" d="M 400 245 L 535 350" />
+            </g>
+
+            <!-- CENTRAL HUB (ENERGY SYSTEM BUS) -->
+            <g class="node-central" transform="translate(370, 220)">
+              <circle r="44" class="hub-outer-circle" />
+              <circle r="36" class="hub-inner-circle" />
+              <text y="-6" text-anchor="middle" class="hub-text-title">ENERGY</text>
+              <text y="14" text-anchor="middle" class="hub-text-sub">SYSTEM</text>
+            </g>
+
+            <!-- NODE: SOLAR (Top) -->
+            <g class="node-block" transform="translate(370, 46)">
+              <rect x="-85" y="-30" width="170" height="60" rx="14" class="node-box node-box-solar" />
+              <text y="-6" text-anchor="middle" class="node-label">SOLAR GENERATION</text>
+              <text y="16" text-anchor="middle" id="flow-solar-val" class="node-val solar-text">0 W</text>
+            </g>
+
+            <!-- NODE: BATTERY (Left) -->
+            <g class="node-block" transform="translate(95, 220)">
+              <rect x="-75" y="-34" width="150" height="68" rx="14" class="node-box node-box-battery" />
+              <text y="-8" text-anchor="middle" class="node-label">BATTERY (BESS)</text>
+              <text y="12" text-anchor="middle" id="flow-bess-val" class="node-val battery-text">0 W</text>
+              <text y="25" text-anchor="middle" id="flow-soc-val" class="node-sub">SOC: -- %</text>
+            </g>
+
+            <!-- NODE: GRID (Right) -->
+            <g class="node-block" transform="translate(645, 220)">
+              <rect x="-75" y="-34" width="150" height="68" rx="14" class="node-box node-box-grid" />
+              <text y="-8" text-anchor="middle" class="node-label">UTILITY GRID</text>
+              <text y="12" text-anchor="middle" id="flow-grid-val" class="node-val grid-text">0 W</text>
+              <text y="25" text-anchor="middle" id="flow-grid-status" class="node-sub">--</text>
+            </g>
+
+            <!-- NODE: EV 1 (Bottom Left) -->
+            <g class="node-block" transform="translate(170, 385)">
+              <rect x="-80" y="-30" width="160" height="60" rx="14" class="node-box node-box-ev1" />
+              <text y="-6" text-anchor="middle" class="node-label">EV CHARGER 1</text>
+              <text y="16" text-anchor="middle" id="flow-ev1-val" class="node-val ev1-text">0 W</text>
+            </g>
+
+            <!-- NODE: EV 2 (Bottom Right) -->
+            <g class="node-block" transform="translate(570, 385)">
+              <rect x="-80" y="-30" width="160" height="60" rx="14" class="node-box node-box-ev2" />
+              <text y="-6" text-anchor="middle" class="node-label">EV CHARGER 2</text>
+              <text y="16" text-anchor="middle" id="flow-ev2-val" class="node-val ev2-text">0 W</text>
+            </g>
+          </svg>
+        </div>
+      </section>
+
+      <!-- EV Control Stations Section -->
+      <section class="controls-section">
+        <div class="section-title-bar">
+          <div>
+            <h2 class="section-title">EV CHARGER DISPATCH CONTROLS</h2>
+            <p class="section-desc">Commands are queued and delivered directly on the next ESP32 POST / handshake</p>
+          </div>
+          <div id="api-status-pill" class="api-pill api-idle">
+            <span>●</span> Server State Ready
+          </div>
+        </div>
+
+        <div class="ev-stations-grid">
+
+          <!-- ===================== EV 1 STATION ===================== -->
+          <div class="ev-station-card" id="card-station-ev1">
+            <!-- Header with Title and Telemetry State -->
+            <div class="station-header">
+              <div class="station-title-group">
+                <span class="station-badge">PORT 01</span>
+                <h3 class="station-name">EV 1 CHARGER</h3>
+              </div>
+              <div id="ev1-actual-badge" class="actual-status-pill status-off">
+                NOT CHARGING
+              </div>
+            </div>
+
+            <!-- Big Measured Power Display -->
+            <div class="station-power-strip">
+              <div class="power-meter-label">CURRENT POWER</div>
+              <div class="power-meter-value">
+                <span id="ev1-ctrl-power" class="meter-number">0</span>
+                <span class="meter-unit">W</span>
+              </div>
+            </div>
+
+            <!-- Telemetry vs Desired Comparison Strip -->
+            <div class="comparison-panel">
+              <div class="comp-col">
+                <span class="comp-label">ACTUAL TELEMETRY</span>
+                <div class="comp-val" id="ev1-telemetry-state-desc">
+                  <span class="comp-indicator-dot dot-off" id="ev1-actual-dot"></span>
+                  <span id="ev1-actual-state-text">NOT CHARGING (0 W)</span>
+                </div>
+              </div>
+              <div class="comp-divider"></div>
+              <div class="comp-col">
+                <span class="comp-label">REQUESTED CONTROL</span>
+                <div class="comp-val" id="ev1-requested-state-desc">
+                  <span class="comp-indicator-dot dot-requested" id="ev1-req-dot"></span>
+                  <span id="ev1-req-state-text">OFF — SOLAR</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pending Badge if telemetry does not match requested command -->
+            <div class="pending-container">
+              <div id="ev1-pending-pill" class="pending-pill hidden">
+                <span class="spin-icon">⏳</span>
+                <span>COMMAND PENDING — Awaiting ESP32 Handshake</span>
+              </div>
+              <div id="ev1-synced-pill" class="synced-pill">
+                <span>✓</span>
+                <span>IN SYNC WITH ESP32</span>
+              </div>
+            </div>
+
+            <!-- Charging ON / OFF Toggle Controls -->
+            <div class="control-group">
+              <label class="control-group-title">CHARGING STATE</label>
+              <div class="btn-group-toggle" role="group" aria-label="EV1 Charge Power">
+                <button type="button" id="btn-ev1-on" class="btn-toggle btn-on" onclick="setEvCharge(1, true)">
+                  <span class="btn-indicator"></span>
+                  <span>ON</span>
+                </button>
+                <button type="button" id="btn-ev1-off" class="btn-toggle btn-off active" onclick="setEvCharge(1, false)">
+                  <span class="btn-indicator"></span>
+                  <span>OFF</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Energy Source Selector Buttons -->
+            <div class="control-group">
+              <label class="control-group-title">ENERGY SOURCE SELECTOR</label>
+              <div class="btn-group-source" role="group" aria-label="EV1 Source Selection">
+                <button type="button" id="btn-ev1-src-0" class="btn-source btn-src-solar active" onclick="setEvSource(1, 0)">
+                  <span class="src-icon">☀️</span>
+                  <span class="src-label">SOLAR</span>
+                  <span class="src-code">(0)</span>
+                </button>
+                <button type="button" id="btn-ev1-src-1" class="btn-source btn-src-battery" onclick="setEvSource(1, 1)">
+                  <span class="src-icon">🔋</span>
+                  <span class="src-label">BATTERY</span>
+                  <span class="src-code">(1)</span>
+                </button>
+                <button type="button" id="btn-ev1-src-2" class="btn-source btn-src-grid" onclick="setEvSource(1, 2)">
+                  <span class="src-icon">⚡</span>
+                  <span class="src-label">GRID</span>
+                  <span class="src-code">(2)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===================== EV 2 STATION ===================== -->
+          <div class="ev-station-card" id="card-station-ev2">
+            <!-- Header with Title and Telemetry State -->
+            <div class="station-header">
+              <div class="station-title-group">
+                <span class="station-badge">PORT 02</span>
+                <h3 class="station-name">EV 2 CHARGER</h3>
+              </div>
+              <div id="ev2-actual-badge" class="actual-status-pill status-off">
+                NOT CHARGING
+              </div>
+            </div>
+
+            <!-- Big Measured Power Display -->
+            <div class="station-power-strip">
+              <div class="power-meter-label">CURRENT POWER</div>
+              <div class="power-meter-value">
+                <span id="ev2-ctrl-power" class="meter-number">0</span>
+                <span class="meter-unit">W</span>
+              </div>
+            </div>
+
+            <!-- Telemetry vs Desired Comparison Strip -->
+            <div class="comparison-panel">
+              <div class="comp-col">
+                <span class="comp-label">ACTUAL TELEMETRY</span>
+                <div class="comp-val" id="ev2-telemetry-state-desc">
+                  <span class="comp-indicator-dot dot-off" id="ev2-actual-dot"></span>
+                  <span id="ev2-actual-state-text">NOT CHARGING (0 W)</span>
+                </div>
+              </div>
+              <div class="comp-divider"></div>
+              <div class="comp-col">
+                <span class="comp-label">REQUESTED CONTROL</span>
+                <div class="comp-val" id="ev2-requested-state-desc">
+                  <span class="comp-indicator-dot dot-requested" id="ev2-req-dot"></span>
+                  <span id="ev2-req-state-text">OFF — SOLAR</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pending Badge if telemetry does not match requested command -->
+            <div class="pending-container">
+              <div id="ev2-pending-pill" class="pending-pill hidden">
+                <span class="spin-icon">⏳</span>
+                <span>COMMAND PENDING — Awaiting ESP32 Handshake</span>
+              </div>
+              <div id="ev2-synced-pill" class="synced-pill">
+                <span>✓</span>
+                <span>IN SYNC WITH ESP32</span>
+              </div>
+            </div>
+
+            <!-- Charging ON / OFF Toggle Controls -->
+            <div class="control-group">
+              <label class="control-group-title">CHARGING STATE</label>
+              <div class="btn-group-toggle" role="group" aria-label="EV2 Charge Power">
+                <button type="button" id="btn-ev2-on" class="btn-toggle btn-on" onclick="setEvCharge(2, true)">
+                  <span class="btn-indicator"></span>
+                  <span>ON</span>
+                </button>
+                <button type="button" id="btn-ev2-off" class="btn-toggle btn-off active" onclick="setEvCharge(2, false)">
+                  <span class="btn-indicator"></span>
+                  <span>OFF</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Energy Source Selector Buttons -->
+            <div class="control-group">
+              <label class="control-group-title">ENERGY SOURCE SELECTOR</label>
+              <div class="btn-group-source" role="group" aria-label="EV2 Source Selection">
+                <button type="button" id="btn-ev2-src-0" class="btn-source btn-src-solar active" onclick="setEvSource(2, 0)">
+                  <span class="src-icon">☀️</span>
+                  <span class="src-label">SOLAR</span>
+                  <span class="src-code">(0)</span>
+                </button>
+                <button type="button" id="btn-ev2-src-1" class="btn-source btn-src-battery" onclick="setEvSource(2, 1)">
+                  <span class="src-icon">🔋</span>
+                  <span class="src-label">BATTERY</span>
+                  <span class="src-code">(1)</span>
+                </button>
+                <button type="button" id="btn-ev2-src-2" class="btn-source btn-src-grid" onclick="setEvSource(2, 2)">
+                  <span class="src-icon">⚡</span>
+                  <span class="src-label">GRID</span>
+                  <span class="src-code">(2)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- Bottom Information & Protocol Diagnostics Panel -->
+    <footer class="bottom-diagnostics">
+      <div class="diag-header">
+        <span class="diag-title">SYSTEM PROTOCOL SPECIFICATION</span>
+        <span class="diag-status">Architecture: Single-Point POST / Handshake</span>
+      </div>
+      <div class="diag-cards">
+        <div class="diag-card">
+          <span class="diag-card-title">ESP32 Handshake (POST /)</span>
+          <code>ESP32 sends telemetry → Server responds with control command (0=Solar, 1=Battery, 2=Grid)</code>
+        </div>
+        <div class="diag-card">
+          <span class="diag-card-title">Browser Control (POST /api/control)</span>
+          <code>Dashboard sets desired state in memory → Dispatched on next ESP32 POST /</code>
+        </div>
+        <div class="diag-card">
+          <span class="diag-card-title">Telemetry Cadence & Health</span>
+          <span id="diag-summary-text">Waiting for initial ESP32 telemetry packet.</span>
+        </div>
+      </div>
+    </footer>
+
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
