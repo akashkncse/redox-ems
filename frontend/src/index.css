@@ -1,11 +1,2 @@
-#root {
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-body {
-  margin: 0;
-  min-width: 320px;
-}
-
-:root { font-family: 'DM Sans', 'Trebuchet MS', sans-serif; color: #d8e1e7; background: #0b1114; font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+#root { min-height: 100vh; }
+html { font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif; font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
