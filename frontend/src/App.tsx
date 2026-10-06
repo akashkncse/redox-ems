@@ -12,7 +12,7 @@ function formatTime(timestamp: string) { const date = new Date(timestamp); retur
 function formatDate(timestamp: string) { const date = new Date(timestamp); return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }
 
 function MetricCard({ label, value, unit, icon, detail, accent, progress }: { label: string; value: string | number; unit?: string; icon: string; detail: string; accent?: string; progress?: number }) {
-  return <Card className={`metric-card ${accent ?? ''}`}><CardContent><div className="metric-label"><span className="metric-icon">{icon}</span>{label}</div><div className="metric-value">{value}{unit && <small>{unit}</small>}</div>{progress !== undefined && <Progress value={progress} /> }<div className="metric-detail">{detail}</div></CardContent></Card>
+  return <Card className={`metric-card ${accent ?? ''}`}><CardContent><div className="metric-label"><span className="metric-icon">{icon}</span>{label}</div><div className="metric-value">{value}{unit && <small>{unit}</small>}</div>{progress !== undefined && <Progress value={progress} />}<div className="metric-detail">{detail}</div></CardContent></Card>
 }
 
 function App() {
