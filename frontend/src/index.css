@@ -1,2 +1,13 @@
-#root { min-height: 100vh; }
-html { font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif; font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-image: url("/bg.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  gap: 10px;
+}

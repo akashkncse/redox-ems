@@ -23,8 +23,6 @@ public class Record {
     private Double ev2_soc;
     private Double bess_soc;
     private Boolean grid_availability;
-
-    // Control fields
     private boolean ev1;
     private int ev1_source;
     private boolean ev2;
