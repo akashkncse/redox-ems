@@ -9,6 +9,7 @@
 
 .sidebar:hover {
   width: 220px;
+  background-color: white;
 }
 
 .sidebar-item {
