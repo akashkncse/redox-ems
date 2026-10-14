@@ -1,23 +1,24 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
+import './sidebar.css';
 
 export default function SideBar() {
   return (
-    <nav>
+    <nav className="sidebar">
       <ul className="sidebar-list" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
         <li>
-          <NavLink
-            to="/"
-            end
-            style={({ isActive }) => ({
-              display: 'block',
-              padding: '0.5rem 1rem',
-              textDecoration: 'none',
-              color: isActive ? '#fff' : '#000',
-              backgroundColor: isActive ? '#007bff' : 'transparent',
-            })}
-          >
-            Overview
+          <NavLink to="/" className="sidebar-item">
+            <div className="icon-box">
+              <img src="/overview.png" alt="Overview" />
+            </div>
+            <span className="nav-label">Overview</span>
+          </NavLink>
+        </li>
+        <li>
+          <NavLink to="/settings" className="sidebar-item">
+            <div className="icon-box">
+              <img src="/settings.png" alt="Settings" />
+            </div>
+            <span className="nav-label">Settings</span>
           </NavLink>
         </li>
       </ul>

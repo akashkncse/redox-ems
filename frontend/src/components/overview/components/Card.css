@@ -1,0 +1,30 @@
+/* Card component styles */
+.card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  height: 200px;
+  background-color: white;
+  border-radius: 30px;
+  transition: all;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in;
+}
+
+.card:hover {
+  box-shadow: -5px 5px #1313138b;
+}
+
+.card-text {
+  font-size: 24px;
+}
+
+.card-title {
+  font-size: 36px;
+}
+
+.card-image {
+  width: 166.431px;
+  height: auto;
+}

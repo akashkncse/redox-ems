@@ -1,7 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Mozilla+Headline:wdth,wght@75..125,200..700&display=swap");
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: "Mozilla Headline", sans-serif;
 }
 
 body {
@@ -11,3 +14,4 @@ body {
   display: flex;
   gap: 10px;
 }
+

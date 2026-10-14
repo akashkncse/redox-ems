@@ -1,0 +1,32 @@
+.ov {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  justify-content: center;
+}
+
+.topbar {
+  display: flex;
+  padding: 15px;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
+  background-color: white;
+  border-radius: 30px;
+  transition: all;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in;
+}
+.topbar:hover {
+  box-shadow: -5px 5px #1313138b;
+}
+.h1 {
+  font-size: 24px;
+  font-weight: lighter;
+}
+
+.overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 10px;
+}
