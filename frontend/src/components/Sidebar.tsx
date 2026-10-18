@@ -8,7 +8,7 @@ export default function SideBar() {
         <li>
           <NavLink to="/" className="sidebar-item">
             <div className="icon-box">
-              <img src="/overview.png" alt="Overview" />
+              <img src="/web-ui/overview.png" alt="Overview" />
             </div>
             <span className="nav-label">Overview</span>
           </NavLink>
@@ -16,7 +16,7 @@ export default function SideBar() {
         <li>
           <NavLink to="/settings" className="sidebar-item">
             <div className="icon-box">
-              <img src="/settings.png" alt="Settings" />
+              <img src="/web-ui/settings.png" alt="Settings" />
             </div>
             <span className="nav-label">Settings</span>
           </NavLink>

@@ -1,4 +1,3 @@
-import './App.css';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import Overview from './components/overview/Overview';
@@ -6,7 +5,7 @@ import Settings from './components/Settings';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/web-ui">
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Overview />} />
