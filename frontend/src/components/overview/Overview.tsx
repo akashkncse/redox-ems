@@ -43,7 +43,6 @@ export default function Overview() {
     ev2: false,
     ev2_source: 0,
   });
-  const [submitting, setSubmitting] = useState(false);
   const [controlStatus, setControlStatus] = useState<string | null>(null);
 
   // Poll backend every 2 seconds
@@ -68,7 +67,14 @@ export default function Overview() {
         let errMsg = '';
 
         if (latestRes.status === 'fulfilled') {
-          setRecord(latestRes.value);
+          const latest = latestRes.value;
+          setRecord(latest);
+          setControl({
+            ev1: latest.ev1,
+            ev1_source: latest.ev1_source as SourceType,
+            ev2: latest.ev2,
+            ev2_source: latest.ev2_source as SourceType,
+          });
         } else {
           hasError = true;
           errMsg = (latestRes.reason as Error)?.message || 'Failed to fetch latest record';
@@ -97,26 +103,26 @@ export default function Overview() {
     };
   }, []);
 
+  const submitControl = async (nextControl: ControlPayload) => {
+    setControlStatus(null);
+    try {
+      await postControl(nextControl);
+      setControlStatus('Control updated.');
+    } catch (err) {
+      setControlStatus((err as Error).message);
+    }
+  };
+
   const handleEvToggle = (key: 'ev1' | 'ev2') => {
-    setControl((prev) => ({ ...prev, [key]: !prev[key] }));
+    const nextControl = { ...control, [key]: !control[key] };
+    setControl(nextControl);
+    void submitControl(nextControl);
   };
 
   const handleSourceChange = (key: 'ev1_source' | 'ev2_source', val: number) => {
-    setControl((prev) => ({ ...prev, [key]: val as SourceType }));
-  };
-
-  const handleSubmitControl = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setControlStatus(null);
-    try {
-      await postControl(control);
-      setControlStatus('Control settings updated successfully.');
-    } catch (err) {
-      setControlStatus((err as Error).message);
-    } finally {
-      setSubmitting(false);
-    }
+    const nextControl = { ...control, [key]: val as SourceType };
+    setControl(nextControl);
+    void submitControl(nextControl);
   };
 
   const formatSource = (source: number) => {
@@ -131,6 +137,9 @@ export default function Overview() {
         return `Source ${source}`;
     }
   };
+
+  const formatPercent = (value: number | null | undefined) =>
+    value == null ? '—' : `${value.toFixed(0)}%`;
 
   const { timestamp, solar_power, ev1_soc, ev2_soc, bess_soc } = record;
   const lastThreeRecords = recentRecords.slice(0, 3);
@@ -154,26 +163,26 @@ export default function Overview() {
         <Card
           imgSrc={bessimg}
           imgAlt="bess"
-          title={`${bess_soc.toFixed(0)}%`}
+          title={formatPercent(bess_soc)}
           description="Battery SOC"
         />
         <Card
           imgSrc={ev1img}
           imgAlt="ev1"
-          title={`${ev1_soc.toFixed(0)}%`}
+          title={formatPercent(ev1_soc)}
           description="EV1 SOC"
         />
         <Card
           imgSrc={ev2img}
           imgAlt="ev2"
-          title={`${ev2_soc.toFixed(0)}%`}
+          title={formatPercent(ev2_soc)}
           description="EV2 SOC"
         />
       </div>
 
       <div className="control-card">
         <div className="control-header">EV Control Panel</div>
-        <form onSubmit={handleSubmitControl} className="control-form">
+        <div className="control-form">
           <div className="control-grid">
             <div className="control-item">
               <div className="control-item-title">EV 1</div>
@@ -228,13 +237,8 @@ export default function Overview() {
             </div>
           </div>
 
-          <div className="control-actions">
-            <button type="submit" disabled={submitting} className="control-btn">
-              {submitting ? 'Updating...' : 'Apply Controls'}
-            </button>
-            {controlStatus && <span className="control-status">{controlStatus}</span>}
-          </div>
-        </form>
+          {controlStatus && <div className="control-status">{controlStatus}</div>}
+        </div>
       </div>
 
       <div className="records-card">
@@ -272,8 +276,8 @@ export default function Overview() {
                     <td className="id-cell">#{r.id}</td>
                     <td className="timestamp-cell">{r.timestamp}</td>
                     <td>{r.solar_power} kW</td>
-                    <td>{r.bess_soc.toFixed(0)}%</td>
-                    <td>{r.ev1_soc.toFixed(0)}%</td>
+                    <td>{formatPercent(r.bess_soc)}</td>
+                    <td>{formatPercent(r.ev1_soc)}</td>
                     <td>
                       <span className={`status-indicator ${r.ev1 ? 'is-active' : 'is-inactive'}`}>
                         <span className="status-dot"></span>
@@ -281,7 +285,7 @@ export default function Overview() {
                       </span>
                     </td>
                     <td>{formatSource(r.ev1_source)}</td>
-                    <td>{r.ev2_soc.toFixed(0)}%</td>
+                    <td>{formatPercent(r.ev2_soc)}</td>
                     <td>
                       <span className={`status-indicator ${r.ev2 ? 'is-active' : 'is-inactive'}`}>
                         <span className="status-dot"></span>

@@ -1,5 +1,6 @@
 package com.redox.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,6 +22,7 @@ public class Record {
     private Double solar_power;
     private Double ev1_soc;
     private Double ev2_soc;
+    @JsonProperty("bess_soc")
     private Double bess_soc;
     private Boolean grid_availability;
     private boolean ev1;

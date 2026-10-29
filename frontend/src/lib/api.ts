@@ -1,9 +1,9 @@
-import { API_BASE_URL } from './config';
+import { AI_API_BASE_URL, API_BASE_URL } from './config';
 import type { Record } from './Record';
 
 export async function fetchServerStatus(): Promise<boolean> {
   try {
-    const response = await fetch(`${API_BASE_URL}/`);
+    const response = await fetch(`${API_BASE_URL}/latest`);
     return response.ok;
   } catch {
     return false;
@@ -61,3 +61,24 @@ export async function postControl(payload: ControlPayload): Promise<void> {
   }
 }
 
+export interface ChatResponse {
+  reply: string;
+  control: ControlPayload | null;
+}
+
+export async function sendChatMessage(message: string): Promise<ChatResponse> {
+  const response = await fetch(`${AI_API_BASE_URL}/chat`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ message }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`AI backend request failed: ${response.status} ${text}`);
+  }
+
+  return response.json() as Promise<ChatResponse>;
+}

@@ -67,7 +67,7 @@ IPAddress SERVER_IP(192, 168, 137, 1);
 const uint16_t SERVER_PORT = 5000;
 
 // Root endpoint exactly as requested.
-const char* API_PATH = "/";
+const char* API_PATH = "/edge";
 
 // Send telemetry every 5 seconds.
 const uint32_t TELEMETRY_INTERVAL_MS = 5000;
@@ -1134,16 +1134,16 @@ bool parseEmsCommand(
     return false;
   }
 
-  if (!doc["ev1_charge"].is<bool>() ||
-      !doc["ev2_charge"].is<bool>() ||
+  if (!doc["ev1"].is<int>() ||
+      !doc["ev2"].is<int>() ||
       !doc["ev1_source"].is<int>() ||
       !doc["ev2_source"].is<int>()) {
     Serial.println("JSON response is missing one or more command fields.");
     return false;
   }
 
-  command.ev1Charge = doc["ev1_charge"].as<bool>();
-  command.ev2Charge = doc["ev2_charge"].as<bool>();
+  command.ev1Charge = doc["ev1"].as<int>() != 0;
+  command.ev2Charge = doc["ev2"].as<int>() != 0;
   command.ev1Source = doc["ev1_source"].as<int>();
   command.ev2Source = doc["ev2_source"].as<int>();
 

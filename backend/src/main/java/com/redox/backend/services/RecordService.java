@@ -1,6 +1,8 @@
 package com.redox.backend.services;
 
 import com.redox.backend.dto.Control;
+import com.redox.backend.dto.EdgeTelemetry;
+import com.redox.backend.dto.EmsCommand;
 import com.redox.backend.dto.Payload;
 import com.redox.backend.model.Record;
 import com.redox.backend.repository.RecordRepository;
@@ -40,6 +42,30 @@ public class RecordService {
         }
 
         return recordRepository.save(record);
+    }
+
+    public EmsCommand processEdgeTelemetry(EdgeTelemetry telemetry, Control control) {
+        EmsCommand command = new EmsCommand(
+                control.isEv1() ? 1 : 0,
+                control.isEv2() ? 1 : 0,
+                control.getEv1_source(),
+                control.getEv2_source()
+        );
+
+        Record record = new Record();
+        record.setTimestamp(telemetry.getTime());
+        record.setSolar_power(telemetry.getSolarPower() == null ? null : telemetry.getSolarPower().doubleValue());
+        record.setEv1_soc(telemetry.getEv1Soc());
+        record.setEv2_soc(telemetry.getEv2Soc());
+        record.setBess_soc(telemetry.getBessSoc());
+        record.setGrid_availability(telemetry.isGrid_availability());
+        record.setEv1(telemetry.isEv1());
+        record.setEv2(telemetry.isEv2());
+        record.setEv1_source(command.getEv1_source());
+        record.setEv2_source(command.getEv2_source());
+        recordRepository.save(record);
+
+        return command;
     }
 
     public Optional<Record> getLatestRecord() {

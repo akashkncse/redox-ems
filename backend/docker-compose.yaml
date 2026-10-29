@@ -8,34 +8,9 @@ services:
       POSTGRES_USER: redoxems
       POSTGRES_PASSWORD: redoxems
     ports:
-      - "5431:5432"
+      - "5173:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: redoxems_backend
-    restart: unless-stopped
-    environment:
-      DB_HOST: postgres
-      POSTGRES_DB: redoxems
-      POSTGRES_USER: redoxems
-      POSTGRES_PASSWORD: redoxems
-    depends_on:
-      - postgres
-
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    container_name: redoxems_frontend
-    restart: unless-stopped
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
 
 volumes:
   postgres_data:
