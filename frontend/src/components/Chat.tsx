@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import './Chat.css';
-import { postControl, sendChatMessage } from '../lib/api';
+import { fetchLatestRecord, postControl, sendChatMessage } from '../lib/api';
+import { loadLocationContext } from '../lib/locationContext';
 
 type Message = {
   id: number;
@@ -41,6 +42,8 @@ const initialMessages: Message[] = [
 ];
 
 const CHAT_STORAGE_KEY = 'redox-ems-chat-messages';
+const TTS_VOICE_STORAGE_KEY = 'redox-ems-tts-voice';
+const TTS_PREVIEW_TEXT = 'Hello, I am your EMS assistant.';
 
 function loadMessages(): Message[] {
   try {
@@ -60,9 +63,50 @@ export default function Chat() {
   const [listening, setListening] = useState(false);
   const [speechError, setSpeechError] = useState('');
   const [sending, setSending] = useState(false);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceUri, setSelectedVoiceUri] = useState('');
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
-  useEffect(() => () => recognitionRef.current?.stop(), []);
+  useEffect(() => () => {
+    recognitionRef.current?.stop();
+    window.speechSynthesis.cancel();
+  }, []);
+
+  useEffect(() => {
+    const loadVoices = () => {
+      const availableVoices = window.speechSynthesis.getVoices();
+      setVoices(availableVoices);
+      const savedVoiceUri = localStorage.getItem(TTS_VOICE_STORAGE_KEY);
+      if (savedVoiceUri && availableVoices.some((voice) => voice.voiceURI === savedVoiceUri)) {
+        setSelectedVoiceUri(savedVoiceUri);
+      } else if (!selectedVoiceUri) {
+        const preferredVoice = availableVoices.find((voice) => voice.lang.toLowerCase().startsWith('en'));
+        setSelectedVoiceUri(preferredVoice?.voiceURI ?? availableVoices[0]?.voiceURI ?? '');
+      }
+    };
+
+    loadVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+  }, [selectedVoiceUri]);
+
+  const getSelectedVoice = () =>
+    voices.find((voice) => voice.voiceURI === selectedVoiceUri);
+
+  const speak = (text: string) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    const voice = getSelectedVoice();
+    if (voice) utterance.voice = voice;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const selectVoice = (voiceUri: string) => {
+    setSelectedVoiceUri(voiceUri);
+    localStorage.setItem(TTS_VOICE_STORAGE_KEY, voiceUri);
+  };
+
+  const previewVoice = () => speak(TTS_PREVIEW_TEXT);
 
   useEffect(() => {
     localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
@@ -108,18 +152,31 @@ export default function Chat() {
     setSending(true);
 
     try {
-      const response = await sendChatMessage(text);
+      const location = loadLocationContext();
+      let latestTelemetry: Awaited<ReturnType<typeof fetchLatestRecord>> | null = null;
+      try {
+        latestTelemetry = await fetchLatestRecord();
+      } catch {
+        // Chat remains usable when telemetry is temporarily unavailable.
+      }
+
+      const response = await sendChatMessage(text, {
+        location,
+        latest_telemetry: latestTelemetry,
+      });
       if (response.control) {
         await postControl(response.control);
       }
+      const spokenReply = response.control
+        ? `${response.reply} Control applied successfully.`
+        : response.reply;
+      speak(spokenReply);
       setMessages((current) => [
         ...current,
         {
           id: Date.now(),
           role: 'assistant',
-          text: response.control
-            ? `${response.reply} Control applied successfully.`
-            : response.reply,
+          text: spokenReply,
         },
       ]);
     } catch (error) {
@@ -157,6 +214,25 @@ export default function Chat() {
         </div>
 
         <div className="chat-composer">
+          <div className="tts-controls">
+            <label htmlFor="tts-voice">Response voice</label>
+            <select
+              id="tts-voice"
+              value={selectedVoiceUri}
+              onChange={(event) => selectVoice(event.target.value)}
+              disabled={voices.length === 0}
+            >
+              {voices.length === 0 && <option value="">No browser voices available</option>}
+              {voices.map((voice) => (
+                <option key={voice.voiceURI} value={voice.voiceURI}>
+                  {voice.name} ({voice.lang})
+                </option>
+              ))}
+            </select>
+            <button type="button" className="preview-button" onClick={previewVoice} disabled={!selectedVoiceUri}>
+              Preview
+            </button>
+          </div>
           <textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}

@@ -2,11 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './Location.css';
-
-type Coordinates = {
-  latitude: number;
-  longitude: number;
-};
+import {
+  loadLocationContext,
+  saveLocationContext,
+  type SolarForecastItem,
+} from '../lib/locationContext';
 
 type Weather = {
   temperature: number;
@@ -15,18 +15,11 @@ type Weather = {
   time: string;
 };
 
-type SolarForecast = {
-  time: string;
-  radiation: number;
-}[];
-
 type SearchResult = {
   display_name: string;
   lat: string;
   lon: string;
 };
-
-const DEFAULT_LOCATION: Coordinates = { latitude: 11.2756, longitude: 77.5870 };
 
 const weatherLabels: Record<number, string> = {
   0: 'Clear sky',
@@ -57,16 +50,16 @@ function formatHour(value: string) {
 }
 
 export default function Location() {
-  const [coordinates, setCoordinates] = useState(DEFAULT_LOCATION);
-  const [placeName, setPlaceName] = useState('Perundurai, Tamil Nadu');
+  const [locationContext, setLocationContext] = useState(loadLocationContext);
+  const { coordinates, placeName, solarForecast } = locationContext;
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [weather, setWeather] = useState<Weather | null>(null);
-  const [solarForecast, setSolarForecast] = useState<SolarForecast>([]);
   const [error, setError] = useState('');
   const mapElement = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
+  const initialCoordinates = useRef(coordinates);
 
   const mapUrl = useMemo(
     () => `https://www.openstreetmap.org/?mlat=${coordinates.latitude}&mlon=${coordinates.longitude}#map=14/${coordinates.latitude}/${coordinates.longitude}`,
@@ -74,29 +67,42 @@ export default function Location() {
   );
 
   useEffect(() => {
+    saveLocationContext(locationContext);
+  }, [locationContext]);
+
+  useEffect(() => {
     if (!mapElement.current || mapRef.current) return;
 
     const map = L.map(mapElement.current).setView(
-      [DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude],
+      [initialCoordinates.current.latitude, initialCoordinates.current.longitude],
       13,
     );
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors',
     }).addTo(map);
 
-    const marker = L.marker([DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude], {
+    const marker = L.marker([
+      initialCoordinates.current.latitude,
+      initialCoordinates.current.longitude,
+    ], {
       draggable: true,
     }).addTo(map);
     marker.bindTooltip('Selected location');
     marker.on('dragend', () => {
       const position = marker.getLatLng();
-      setCoordinates({ latitude: position.lat, longitude: position.lng });
-      setPlaceName('Selected map location');
+      setLocationContext((current) => ({
+        ...current,
+        coordinates: { latitude: position.lat, longitude: position.lng },
+        placeName: 'Selected map location',
+      }));
     });
     map.on('click', (event) => {
       marker.setLatLng(event.latlng);
-      setCoordinates({ latitude: event.latlng.lat, longitude: event.latlng.lng });
-      setPlaceName('Selected map location');
+      setLocationContext((current) => ({
+        ...current,
+        coordinates: { latitude: event.latlng.lat, longitude: event.latlng.lng },
+        placeName: 'Selected map location',
+      }));
     });
 
     mapRef.current = map;
@@ -172,10 +178,11 @@ export default function Location() {
           weathercode: data.current.weather_code,
           time: data.current.time,
         });
-        setSolarForecast(data.hourly.time.map((time, index) => ({
+        const forecast: SolarForecastItem[] = data.hourly.time.map((time, index) => ({
           time,
           radiation: data.hourly.shortwave_radiation[index] ?? 0,
-        })).filter((item) => item.radiation > 0).slice(0, 6));
+        })).filter((item) => item.radiation > 0).slice(0, 6);
+        setLocationContext((current) => ({ ...current, solarForecast: forecast }));
         setError('');
       })
       .catch((reason: Error) => {
@@ -187,8 +194,11 @@ export default function Location() {
 
   const selectSearchResult = (result: SearchResult) => {
     const next = { latitude: Number(result.lat), longitude: Number(result.lon) };
-    setCoordinates(next);
-    setPlaceName(result.display_name);
+    setLocationContext((current) => ({
+      ...current,
+      coordinates: next,
+      placeName: result.display_name,
+    }));
     setSearch(result.display_name);
     setSearchResults([]);
   };

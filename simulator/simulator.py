@@ -139,7 +139,7 @@ def run(endpoint: str, interval: float, dry_run: bool) -> None:
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Simulate an ESP32 sending telemetry.")
-    parser.add_argument("--url", default="http://localhost:5000/edge")
+    parser.add_argument("--url", default="http://localhost:5000/api/telemetry")
     parser.add_argument("--interval", type=float, default=5.0)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()

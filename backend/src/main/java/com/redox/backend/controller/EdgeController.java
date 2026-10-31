@@ -35,7 +35,7 @@ public class EdgeController {
         return this.controlState;
     }
 
-    @PostMapping("/edge")
+    @PostMapping("/api/telemetry")
     public EmsCommand receiveEdgeData(@RequestBody EdgeTelemetry telemetry) {
         return recordService.processEdgeTelemetry(telemetry, this.controlState);
     }

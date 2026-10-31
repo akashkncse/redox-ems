@@ -10,6 +10,6 @@ python simulator.py
 Options:
 
 ```text
-python simulator.py --url http://localhost:5000/edge --interval 5
+python simulator.py --url http://localhost:5000/api/telemetry --interval 5
 python simulator.py --dry-run
 ```

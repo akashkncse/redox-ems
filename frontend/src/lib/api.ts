@@ -1,5 +1,6 @@
 import { AI_API_BASE_URL, API_BASE_URL } from './config';
 import type { Record } from './Record';
+import type { LocationContext } from './locationContext';
 
 export async function fetchServerStatus(): Promise<boolean> {
   try {
@@ -66,13 +67,18 @@ export interface ChatResponse {
   control: ControlPayload | null;
 }
 
-export async function sendChatMessage(message: string): Promise<ChatResponse> {
+export interface ChatContext {
+  location: LocationContext;
+  latest_telemetry: Record | null;
+}
+
+export async function sendChatMessage(message: string, context: ChatContext): Promise<ChatResponse> {
   const response = await fetch(`${AI_API_BASE_URL}/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, context }),
   });
 
   if (!response.ok) {

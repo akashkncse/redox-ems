@@ -4,7 +4,7 @@ import ev1img from './assets/ev1.jpg';
 import ev2img from './assets/ev2.png';
 import solarimg from './assets/solar.png';
 import "./overview.css";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   fetchLatestRecord,
   fetchRecentRecords,
@@ -43,14 +43,18 @@ export default function Overview() {
     ev2: false,
     ev2_source: 0,
   });
+  const [appliedControl, setAppliedControl] = useState<ControlPayload | null>(null);
   const [controlStatus, setControlStatus] = useState<string | null>(null);
+  const [isSubmittingControl, setIsSubmittingControl] = useState(false);
+  const [controlInitialized, setControlInitialized] = useState(false);
+  const controlInitializedRef = useRef(false);
 
   // Poll backend every 2 seconds
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
       const active = await fetchServerStatus();
-      
+
       if (!cancelled) setServerActive(active);
       if (!active) {
         setError('Server inactive');
@@ -69,12 +73,18 @@ export default function Overview() {
         if (latestRes.status === 'fulfilled') {
           const latest = latestRes.value;
           setRecord(latest);
-          setControl({
+          const latestControl: ControlPayload = {
             ev1: latest.ev1,
             ev1_source: latest.ev1_source as SourceType,
             ev2: latest.ev2,
             ev2_source: latest.ev2_source as SourceType,
-          });
+          };
+          setAppliedControl(latestControl);
+          if (!controlInitializedRef.current) {
+            setControl(latestControl);
+            controlInitializedRef.current = true;
+            setControlInitialized(true);
+          }
         } else {
           hasError = true;
           errMsg = (latestRes.reason as Error)?.message || 'Failed to fetch latest record';
@@ -103,27 +113,36 @@ export default function Overview() {
     };
   }, []);
 
-  const submitControl = async (nextControl: ControlPayload) => {
-    setControlStatus(null);
+  const submitControl = async () => {
+    setControlStatus('Applying controls...');
+    setIsSubmittingControl(true);
     try {
-      await postControl(nextControl);
+      await postControl(control);
+      setAppliedControl(control);
       setControlStatus('Control updated.');
     } catch (err) {
       setControlStatus((err as Error).message);
+    } finally {
+      setIsSubmittingControl(false);
     }
   };
 
   const handleEvToggle = (key: 'ev1' | 'ev2') => {
-    const nextControl = { ...control, [key]: !control[key] };
-    setControl(nextControl);
-    void submitControl(nextControl);
+    setControl((current) => ({ ...current, [key]: !current[key] }));
+    setControlStatus('Unsaved control changes.');
   };
 
   const handleSourceChange = (key: 'ev1_source' | 'ev2_source', val: number) => {
-    const nextControl = { ...control, [key]: val as SourceType };
-    setControl(nextControl);
-    void submitControl(nextControl);
+    setControl((current) => ({ ...current, [key]: val as SourceType }));
+    setControlStatus('Unsaved control changes.');
   };
+
+  const controlsMatch =
+    appliedControl !== null &&
+    control.ev1 === appliedControl.ev1 &&
+    control.ev1_source === appliedControl.ev1_source &&
+    control.ev2 === appliedControl.ev2 &&
+    control.ev2_source === appliedControl.ev2_source;
 
   const formatSource = (source: number) => {
     switch (source) {
@@ -157,7 +176,7 @@ export default function Overview() {
         <Card
           imgSrc={solarimg}
           imgAlt="solar"
-          title={`${solar_power} kW`}
+          title={`${solar_power} W`}
           description="Solar production"
         />
         <Card
@@ -237,7 +256,17 @@ export default function Overview() {
             </div>
           </div>
 
-          {controlStatus && <div className="control-status">{controlStatus}</div>}
+          <div className="control-actions">
+            <button
+              className="control-btn"
+              type="button"
+              onClick={() => void submitControl()}
+              disabled={isSubmittingControl || !controlInitialized || controlsMatch}
+            >
+              {isSubmittingControl ? 'Applying...' : 'Apply Controls'}
+            </button>
+            {controlStatus && <div className="control-status">{controlStatus}</div>}
+          </div>
         </div>
       </div>
 
@@ -275,7 +304,7 @@ export default function Overview() {
                   <tr key={r.id}>
                     <td className="id-cell">#{r.id}</td>
                     <td className="timestamp-cell">{r.timestamp}</td>
-                    <td>{r.solar_power} kW</td>
+                    <td>{r.solar_power} W</td>
                     <td>{formatPercent(r.bess_soc)}</td>
                     <td>{formatPercent(r.ev1_soc)}</td>
                     <td>

@@ -9,6 +9,7 @@ import com.redox.backend.repository.RecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,7 +54,7 @@ public class RecordService {
         );
 
         Record record = new Record();
-        record.setTimestamp(telemetry.getTime());
+        record.setTimestamp(Instant.now().toString());
         record.setSolar_power(telemetry.getSolarPower() == null ? null : telemetry.getSolarPower().doubleValue());
         record.setEv1_soc(telemetry.getEv1Soc());
         record.setEv2_soc(telemetry.getEv2Soc());
